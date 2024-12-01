@@ -3,10 +3,10 @@ from tkinter import messagebox
 from queue import Queue
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import json  # Untuk menyimpan dan memuat data pengguna
+import json 
+import re
 
-# Modul 1: Array / List Data Type
-# Definisi pertanyaan dan pilihan jawaban
+
 pertanyaan = [
     {
         "question": "Saat berada di tim, peran apa yang paling kamu suka?",
@@ -33,37 +33,32 @@ pertanyaan = [
         "answers": ["Menjaga pertahanan tim dan menjaga posisi di garis depan", "Menunggu kesempatan untuk memberikan damage besar dari belakang", "Mengincar musuh yang lemah dan menyerang dengan cepat", "Menggunakan skill untuk memporak-porandakan musuh dengan area damage", "Membantu tim dengan heal dan memberikan buff untuk memperkuat tim"],
         "scores": [20, 10, 30, 25, 15]
     },
+    
 ]
 
-# Queue untuk menyimpan pertanyaan (Modul 7: Stack & Queue)
-# Queue untuk menyimpan pertanyaan
+
 pertanyaan_queue = Queue()
 
-# Vector stack untuk menghitung skor
+
 perhitungan_stack = [0, 0, 0, 0, 0]
 
-# Menyimpan data pengguna (Modul 1: Array / List Data Type)
-# Menyimpan data pengguna
+
 users = {}
 
 
-# Fungsi untuk menyimpan data pengguna ke file
 def simpan_data_pengguna():
     with open("users.json", "w") as f:
         json.dump(users, f)
 
-
-# Fungsi untuk memuat data pengguna dari file
 def muat_data_pengguna():
     global users
     try:
         with open("users.json", "r") as f:
             users = json.load(f)
+            print("Users loaded:", users)
     except FileNotFoundError:
-        users = {}  # Jika file tidak ada, buat dictionary kosong
-
-
-# Penjelasan untuk setiap karakteristik
+        users = {}  
+        
 char_kecocokan = {
     "Tank": "Kamu lebih suka bertahan hidup lebih lama dan menjadi pelindung bagi tim.",
     "Marksman": "Kamu adalah penyerang jarak jauh yang handal.",
@@ -72,8 +67,7 @@ char_kecocokan = {
     "Support": "Kamu suka membantu tim dan memperkuat mereka."
 }
 
-
-# Fungsi untuk memproses hasil tes
+#
 def hitung_hasil():
     total_score = sum(perhitungan_stack)
     total_max_score = len(pertanyaan) * 20
@@ -92,7 +86,6 @@ def hitung_hasil():
     tampilkan_dashboard(dominasi_char, total_score, total_max_score)
 
 
-# Modul 4: Fungsi dan Method
 def tampilkan_dashboard(dominasi_char, total_score, max_score):
     for widget in frame.winfo_children():
         widget.pack_forget()
@@ -125,7 +118,6 @@ def tampilkan_dashboard(dominasi_char, total_score, max_score):
     tombol_restart.pack(pady=5, anchor="center")
 
 
-# Fungsi untuk menampilkan menu login
 def tampilkan_menu_login():
     for widget in frame.winfo_children():
         widget.pack_forget()
@@ -142,7 +134,8 @@ def tampilkan_menu_login():
     def login():
         username = username_entry.get()
         password = password_entry.get()
-        if username in users and users[username]["password"] == password:  # Ambil password dari dictionary
+        print(f"Trying to login with Username: {username} and Password: {password}")
+        if username in users and users[username]["password"] == password:
             messagebox.showinfo("Selamat Anda Login", f"Selamat datang, {username}!")
             tampilkan_menu_utama()
         else:
@@ -155,7 +148,6 @@ def tampilkan_menu_login():
     register_button.pack(pady=10, anchor="center")
 
 
-# Fungsi untuk menampilkan menu registrasi
 def tampilkan_menu_registrasi():
     for widget in frame.winfo_children():
         widget.pack_forget()
@@ -179,7 +171,6 @@ def tampilkan_menu_registrasi():
     email_entry.pack(pady=5, anchor="center")
 
     def validasi_email(email):
-        import re
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(email_regex, email) is not None
 
@@ -192,9 +183,9 @@ def tampilkan_menu_registrasi():
             if username not in users:
                 if validasi_email(email):
                     users[username] = {"password": password, "email": email}
-                    simpan_data_pengguna()  # Simpan data pengguna setelah registrasi
+                    simpan_data_pengguna()
                     messagebox.showinfo("Registrasi Berhasil", f"Selamat {username}, kamu telah berhasil mendaftar!")
-                    tampilkan_menu_login()
+                    tampilkan_menu_login     
                 else:
                     messagebox.showerror("Error", "Email tidak valid! Masukkan email yang benar.")
             else:
@@ -209,7 +200,6 @@ def tampilkan_menu_registrasi():
     tombol_kembali.pack(pady=5, anchor="center")
 
 
-# Fungsi untuk menampilkan menu utama
 def tampilkan_menu_utama():
     for widget in frame.winfo_children():
         widget.pack_forget()
@@ -224,12 +214,9 @@ def tampilkan_menu_utama():
     exit_button.pack(pady=10, anchor="center")
 
 
-# Fungsi untuk keluar dari aplikasi
 def keluar_aplikasi():
     root.quit()
 
-
-# Modul 3: Perulangan (Loops)
 # Fungsi untuk memulai tes
 def mulai_tes():
     global perhitungan_stack, pertanyaan_queue
@@ -254,7 +241,6 @@ def mulai_tes():
     tampilkan_pertanyaan_selanjutnya()
 
 
-# Fungsi untuk menampilkan pertanyaan berikutnya
 def tampilkan_pertanyaan_selanjutnya():
     if not pertanyaan_queue.empty():
         question = pertanyaan_queue.get()
@@ -265,7 +251,6 @@ def tampilkan_pertanyaan_selanjutnya():
         hitung_hasil()
 
 
-# Fungsi untuk merekam jawaban
 def rekam_jawaban(answer_index):
     current_question = pertanyaan[len(perhitungan_stack) - sum(v == 0 for v in perhitungan_stack) - 1]
     perhitungan_stack[answer_index] += current_question["scores"][answer_index]
@@ -273,21 +258,18 @@ def rekam_jawaban(answer_index):
     tampilkan_pertanyaan_selanjutnya()
 
 
-# Setup GUI
 root = tk.Tk()
 root.title("Tes Kepribadian Mobile Legends")
 root.configure(bg="black")
-root.geometry("800x600") 
-
-# Memuat gambar latar belakang menggunakan PIL
+root.geometry("800x600")
 
 frame = tk.Frame(root, bg="grey")
-frame.pack(fill='both', expand=True) # Membuat frame menempati seluruh jendelaframe.pack(pady=20, expand=True)
+frame.pack(fill='both', expand=True)
 
-# Memuat data pengguna dari file
+
 muat_data_pengguna()
 
-# Menampilkan menu login
+
 tampilkan_menu_login()
 
 root.mainloop()
